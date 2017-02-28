@@ -41,7 +41,7 @@ class Bot(object):
         self.logger = None
 
         try:
-            version_info = sys.version.splitlines()[0].strip()
+            version_info = sys.version.splitlines()[0].strip()  #3.5.2 (default, Nov 17 2016, 17:05:23)
             self.__log_buffer.append(('info',
                                       '{} initialized with id {} and version '
                                       '{} as process {}.'
