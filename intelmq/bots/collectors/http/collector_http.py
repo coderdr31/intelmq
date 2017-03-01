@@ -19,7 +19,7 @@ import requests
 
 from intelmq.lib.bot import CollectorBot
 
-
+#
 class HTTPCollectorBot(CollectorBot):
 
     def init(self):
