@@ -49,7 +49,7 @@ Please report any errors you encounter at https://github.com/certtools/intelmq/i
 
 ```bash
 apt-get install python3 python3-pip
-apt-get install git build-essential libcurl4-gnutls-dev libffi-dev
+apt-get install git build-essential libffi-dev
 apt-get install python3-dev
 apt-get install redis-server
 ```
@@ -66,7 +66,7 @@ python3.4 /tmp/get-pip.py
 ```bash
 yum install epel-release
 yum install python34 python34-devel
-yum install git libcurl-devel gcc gcc-c++
+yum install git gcc gcc-c++
 yum install redis
 ```
 
@@ -84,9 +84,14 @@ systemctl start redis
 
 ## Installation
 
-The `REQUIREMENTS` files define a list python packages and versions, which are necessary to run *all components* of IntelMQ. The defined versions are recommendations.
+The `REQUIREMENTS` files define a list of python packages and versions, which are necessary to run most components of IntelMQ. The defined (minimal) versions are recommendations. Some bots have additional dependencies which are mentioned in their documentation and their own `REQUIREMENTS` file (in their source directory).
 
-If you do not do any modifications on the code, use `pip install intelmq` instead of `pip install .`!
+If your Python version is lower than 3.5 you additionally need the "typing" package:
+```bash
+pip3 install typing
+```
+
+If you do not do any modifications on the code, use `pip install intelmq` instead of `pip install .` or packages.
 
 ```bash
 git clone https://github.com/certtools/intelmq.git /tmp/intelmq
@@ -192,7 +197,7 @@ More examples can be found at `intelmq/etc/pipeline.conf` directory in IntelMQ r
     
     * **`pass`** - will pass to the next message after retry X times, removing from pipeline the current message. If the option `error_dump_message` is enable, the bot will dump the removed message to the dump log.
 
-* **`error_max_retries`** - in case of an error and the value of the `error_procedure` option is `retry`, bot will try to start processing the current message X times defined at `error_max_retries` option. The value must be an `integer value`.
+* **`error_max_retries`** - in case of an error the bot will try to start processing the current message X times defined at `error_max_retries` option. The value must be an integer value.
 
 * **`error_retry_delay`** - in case of an error, this option will allows you to define the number of seconds which bot will wait until next retry. The value must be an `integer value`.
 
@@ -275,6 +280,24 @@ This configuration is used by each bot to load the specific parameters associate
 
 More examples can be found at `intelmq/etc/runtime.conf` directory in IntelMQ repository.
 
+By default all of the bots are started when you start the whole botnet, however there is a possibility to *disable* a bot. This means that the bot will not start every time you start the botnet, but you can start and stop the bot if you specify the bot explicitly. To disable a bot, add the following to your runtime.conf: `"enabled": false`. For example: 
+
+```
+{
+    "malware-domain-list-collector": {
+        "group": "Collector",
+        "name": "Malware Domain List",
+        "module": "intelmq.bots.collectors.http.collector_http",
+        "description": "Malware Domain List Collector is the bot responsible to get the report from source of information.",
+        "enabled": false,
+        "parameters": {
+            "http_url": "http://www.malwaredomainlist.com/updatescsv.php",
+            "feed": "Malware Domain List",
+            "rate_limit": 3600
+        }
+    }
+}
+```
 
 ## Harmonization Configuration
 
@@ -352,14 +375,45 @@ See [IntelMQ Manager repository](https://github.com/certtools/intelmq-manager).
 
 ```bash
 # su - intelmq
-
 $ intelmqctl -h
-usage: 
-        intelmqctl [start|stop|restart|status|run] bot-id
-        intelmqctl [start|stop|restart|status]
+intelmqctl [-h] [-v] [--type {text,json}] [--quiet]
+                  {list,check,clear,log,run,help,start,stop,restart,reload,status}
+                  ...
+
+        description: intelmqctl is the tool to control intelmq system.
+
+        Outputs are logged to /opt/intelmq/var/log/intelmqctl
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --version         show program's version number and exit
+  --type {text,json}, -t {text,json}
+                        choose if it should return regular text or other
+                        machine-readable
+  --quiet, -q           Quiet mode, useful for reloads initiated scripts like
+                        logrotate
+
+subcommands:
+  {list,check,clear,log,run,help,start,stop,restart,reload,status}
+    list                Listing bots or queues
+    check               Check installation and configuration
+    clear               Clear a queue
+    log                 Get last log lines of a bot
+    run                 Run a bot interactively
+    check               Check installation and configuration
+    help                Show the help
+    start               Start a bot or botnet
+    stop                Stop a bot or botnet
+    restart             Restart a bot or botnet
+    reload              Reload a bot or botnet
+    status              Status of a bot or botnet
+
+        intelmqctl [start|stop|restart|status|reload|run] bot-id
+        intelmqctl [start|stop|restart|status|reload]
         intelmqctl list [bots|queues]
         intelmqctl log bot-id [number-of-lines [log-level]]
         intelmqctl clear queue-id
+        intelmqctl check
 
 Starting a bot:
     intelmqctl start bot-id
@@ -382,32 +436,19 @@ Get a list of all configured bots:
 
 Get a list of all queues:
     intelmqctl list queues
+If -q is given, only queues with more than one item are listed.
 
 Clear a queue:
     intelmqctl clear queue-id
 
 Get logs of a bot:
-    intelmqctl log bot-id [number-of-lines [log-level]]
-    Reads the last lines from bot log, or from system log if no bot ID was
-    given. Log level should be one of DEBUG, INFO, ERROR or CRITICAL.
-    Default is INFO. Number of lines defaults to 10, -1 gives all. Result
-    can be longer due to our logging format!
+    intelmqctl log bot-id number-of-lines log-level
+Reads the last lines from bot log.
+Log level should be one of DEBUG, INFO, ERROR or CRITICAL.
+Default is INFO. Number of lines defaults to 10, -1 gives all. Result
+can be longer due to our logging format!
 
-positional arguments:
-  [start|stop|restart|status|run|list|clear|log]
-  parameter
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -v, --version         show program's version number and exit
-  --type {text,json}, -t {text,json}
-                        choose if it should return regular text or other
-                        machine-readable
-  --quiet, -q           Quiet mode, useful for reloads initiatedscripts like
-                        logrotate
-
-description: intelmqctl is the tool to control intelmq system. Outputs are
-logged to /opt/intelmq/var/log/intelmqctl
+Outputs are additionally logged to /opt/intelmq/var/log/intelmqctl
 ```
 
 #### Botnet Concept
@@ -548,6 +589,10 @@ Consult the [FAQ](FAQ.md) if you encountered any problem.
 
 
 # Additional Information
+
+## Bash Completion
+
+To enable bash completion on `intelmqctl` and `intelmqdump` in order to help you run the commands in an easy manner, follow the installation process [here](../contrib/bash-completion/README.md).
 
 ## Performance Tests
 
