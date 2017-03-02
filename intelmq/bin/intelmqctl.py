@@ -253,7 +253,7 @@ class BotProcessManager:
 
     def __status_process(self, pid):
         try:
-            psutil.Process(int(pid))
+            psutil.Process(int(pid))    # 根据pid获取进程
             return True
         except psutil.NoSuchProcess:
             return False

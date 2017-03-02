@@ -53,7 +53,7 @@ class Bot(object):
             self.__load_defaults_configuration()
             self.__load_system_configuration()
 
-            self.__check_bot_id(bot_id)
+            self.__check_bot_id(bot_id)     # 检查bot_id命名是否符合规定
             self.__bot_id = bot_id
 
             if self.parameters.logging_handler == 'syslog':
@@ -74,7 +74,7 @@ class Bot(object):
             self.logger.info('Bot is starting.')
             self.__load_runtime_configuration()
             self.__load_pipeline_configuration()
-            self.__load_harmonization_configuration()
+            self.__load_harmonization_configuration()   # 这应该只是进行load(赋值)，并没执行配置
 
             self.init()
 
@@ -268,7 +268,7 @@ class Bot(object):
             print(level.upper(), '-', message)
         self.__log_buffer = []
 
-    def __check_bot_id(self, str):
+    def __check_bot_id(self, str):  # bot_id不能出现除了 0-9a-zA-Z(数字、字母)和-  以外的字符
         res = re.search('[^0-9a-zA-Z\-]+', str)
         if res:
             self.__log_buffer.append(('error',
