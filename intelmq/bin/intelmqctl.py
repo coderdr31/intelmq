@@ -117,7 +117,7 @@ class BotProcessManager:
                                   'created: %s.' % (self.PIDDIR, exc))
 
     def bot_run(self, bot_id):
-        pid = self.__read_pidfile(bot_id)
+        pid = self.__read_pidfile(bot_id)       # 返回bot_id对应的pid
         if pid:
             if self.__status_process(pid):
                 log_bot_error('running', bot_id)
@@ -131,10 +131,11 @@ class BotProcessManager:
 
         bot_module = self.__runtime_configuration[bot_id]['module']
         module = importlib.import_module(bot_module)
-        bot = getattr(module, 'BOT')
+        bot = getattr(module, 'BOT')    # equal to module.BOT
         try:
-            instance = bot(bot_id)
+            instance = bot(bot_id)  # 实例化module那个对应的bot文件了, bot_id 是key(object) from runtime.conf
             instance.start()
+
         except (Exception, KeyboardInterrupt) as exc:
             print('Bot failed: %s' % exc)
             retval = 1
@@ -227,7 +228,7 @@ class BotProcessManager:
     def _is_enabled(self, bot_id):
         return self.__runtime_configuration[bot_id].get('enabled', True)
 
-    def __read_pidfile(self, bot_id):
+    def __read_pidfile(self, bot_id):   # 返回bot_id对应的pid号
         filename = self.PIDFILE.format(bot_id)
         if self.__check_pidfile(bot_id):
             with open(filename, 'r') as fp:
@@ -284,7 +285,7 @@ class IntelMQController():
             logger.error('Not logging to file: %s' % exc)
         self.logger = logger
         self.interactive = interactive
-        if os.geteuid() == 0:
+        if os.geteuid() == 0:   # Return the current process's effective user id.
             logger.warning('Running intelmqctl as root is highly discouraged!')
 
         APPNAME = "intelmqctl"
@@ -507,7 +508,7 @@ Outputs are additionally logged to /opt/intelmq/var/log/intelmqctl'''
 
     def run(self):
         results = None
-        args = self.parser.parse_args()
+        args = self.parser.parse_args()     # 命令后的变量，用args.xxx调用
         if 'func' not in args:
             exit(self.parser.print_help())
         args_dict = vars(args).copy()

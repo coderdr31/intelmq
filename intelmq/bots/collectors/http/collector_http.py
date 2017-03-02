@@ -19,9 +19,9 @@ import requests
 
 from intelmq.lib.bot import CollectorBot
 
-#
-class HTTPCollectorBot(CollectorBot):
 
+class HTTPCollectorBot(CollectorBot):
+    # 传入的CollectorBot是key(object) from runtime.conf
     def init(self):
         self.set_request_parameters()
 

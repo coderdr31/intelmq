@@ -47,6 +47,7 @@ class Bot(object):
                                       ''.format(self.__class__.__name__,
                                                 bot_id, version_info,
                                                 os.getpid())))
+
             self.__log_buffer.append(('debug', 'Library path: %r.' % __file__))
 
             self.__load_defaults_configuration()
@@ -626,7 +627,7 @@ class CollectorBot(Bot):
             if not hasattr(self.parameters, 'https_proxy'):
                 self.parameters.https_proxy = self.parameters.http_ssl_proxy
 
-        self.http_header = getattr(self.parameters, 'http_header', {})
+        self.http_header = getattr(self.parameters, 'http_header', {})  # 若无，则返 {}
         self.http_verify_cert = getattr(self.parameters, 'http_verify_cert',
                                         True)
         self.ssl_client_cert = getattr(self.parameters,
