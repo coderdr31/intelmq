@@ -50,7 +50,7 @@ class Bot(object):
 
             self.__log_buffer.append(('debug', 'Library path: %r.' % __file__))
 
-            self.__load_defaults_configuration()
+            self.__load_defaults_configuration()    # defaults.conf写入 __log_buffer, ().config , self.parameters
             self.__load_system_configuration()
 
             self.__check_bot_id(bot_id)     # 检查bot_id命名是否符合规定
@@ -71,10 +71,10 @@ class Bot(object):
                 getattr(self.logger, line[0])(line[1])
 
         try:
-            self.logger.info('Bot is starting.')
-            self.__load_runtime_configuration()
-            self.__load_pipeline_configuration()
-            self.__load_harmonization_configuration()   # 这应该只是进行load(赋值)，并没执行配置
+            self.logger.info('Bot is starting.')    # console输出
+            self.__load_runtime_configuration()     # log信息, runtime.conf写入self.parameters
+            self.__load_pipeline_configuration()    # pipeline.conf写入self.__source_queues、destination...
+            self.__load_harmonization_configuration()   # 写入self.harmonization
 
             self.init()
 
@@ -381,7 +381,7 @@ class Bot(object):
     def __load_defaults_configuration(self):
         self.__log_buffer.append(('debug', "Loading defaults configuration from %r."
                                   "" % DEFAULTS_CONF_FILE))
-        config = utils.load_configuration(DEFAULTS_CONF_FILE)
+        config = utils.load_configuration(DEFAULTS_CONF_FILE)   # Load JSON configuration file(load: json -> python)
 
         setattr(self.parameters, 'logging_path', DEFAULT_LOGGING_PATH)
 
@@ -537,7 +537,7 @@ class ParserBot(Bot):
             self.acknowledge_message()
             return
 
-        for line in self.parse(report):
+        for line in self.parse(report):     # 不明白为什么会调用parser_csv
             if not line:
                 continue
             try:

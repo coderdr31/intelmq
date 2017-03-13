@@ -94,7 +94,7 @@ class Redis(Pipeline):
         pass
 
     def set_queues(self, queues, queues_type):
-        self.load_configurations(queues_type)
+        self.load_configurations(queues_type)   #set self.xxx about source pipeline
         super(Redis, self).set_queues(queues, queues_type)
 
     def send(self, message):

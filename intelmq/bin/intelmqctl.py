@@ -133,7 +133,7 @@ class BotProcessManager:
         module = importlib.import_module(bot_module)
         bot = getattr(module, 'BOT')    # equal to module.BOT
         try:
-            instance = bot(bot_id)  # 实例化module那个对应的bot文件了, bot_id 是key(object) from runtime.conf
+            instance = bot(bot_id)  # 实例化module那个对应的bot文件了, bot_id 是key(object) from runtime.conf/str
             instance.start()
 
         except (Exception, KeyboardInterrupt) as exc:

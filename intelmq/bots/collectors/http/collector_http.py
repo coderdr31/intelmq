@@ -23,7 +23,7 @@ from intelmq.lib.bot import CollectorBot
 class HTTPCollectorBot(CollectorBot):
     # 传入的CollectorBot是key(object) from runtime.conf
     def init(self):
-        self.set_request_parameters()
+        self.set_request_parameters()   # set self.xxx (set_request_parameters)
 
     def process(self):
         self.logger.info("Downloading report from %s" %
@@ -56,7 +56,7 @@ class HTTPCollectorBot(CollectorBot):
             report = self.new_report()
             report.add("raw", raw_report)
             report.add("feed.url", self.parameters.http_url)
-            self.send_message(report)
+            self.send_message(report)   # 会增加raw以外的一些东西(若self.para 有)
 
 
 BOT = HTTPCollectorBot
