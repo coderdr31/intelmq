@@ -3,7 +3,7 @@
 from intelmq.lib.bot import ParserBot
 
 
-class TestByDrSslblacklistParserBot(ParserBot):
+class OtherSslblacklistParserBot(ParserBot):
     ignore_lines_starting = ['#']
     parse = ParserBot.parse_csv
     recover_line = ParserBot.recover_line_csv
@@ -17,4 +17,4 @@ class TestByDrSslblacklistParserBot(ParserBot):
         event.add("raw", self.recover_line(row))
         yield event
 
-BOT = TestByDrSslblacklistParserBot
+BOT = OtherSslblacklistParserBot

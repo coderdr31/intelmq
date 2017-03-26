@@ -6,15 +6,43 @@ import io
 from intelmq.lib.bot import ParserBot
 from intelmq.lib import utils
 
+'''
+"/opt/drtest/csv.conf" eg:
+{
+    "test1-parser": {
+        "file_type": "csv",
+        "ignore_lines_starting": ["//","#"],
+        "ignore_start_lines": "2",
+        "sequence": [
+            "time.source",
+            "source.url"
+        ],
+        "delimiter": null
+    }
+}
+
+"runtime.conf" eg:
+    "malware-domain-list-parser": {
+        "parameters": {
+        "othername": "test1-parser"
+        },
+        "group": "Parser",
+        "name": "Malware Domain List",
+        "module": "intelmq.bots.parsers.other.parser_csv",
+        "description": "Malware Domain List Parser is the bot responsible to parse the report and sanitize the information."
+    }
+
+'''
+
 CSV_PARSER_CONF_FILE = "/opt/drtest/csv.conf"
 
-
-class TestByDrCsvParserBot(ParserBot):
+class OtherCsvParserBot(ParserBot):
     parse = ParserBot.parse_csv
 
     def __init__(self, bot_id):
-        super(TestByDrCsvParserBot, self).__init__(bot_id=bot_id)
+        super(OtherCsvParserBot, self).__init__(bot_id=bot_id)
         self._config = utils.load_configuration(CSV_PARSER_CONF_FILE)
+        self._config = self._config[self.parameters.othername]
 
         if self._config.get('ignore_lines_starting'):
             self.ignore_lines_starting = self._config['ignore_lines_starting']
@@ -60,7 +88,7 @@ class TestByDrCsvParserBot(ParserBot):
         yield event
 
 
-BOT = TestByDrCsvParserBot
+BOT = OtherCsvParserBot
 
 
 # class test(object):
