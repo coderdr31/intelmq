@@ -38,11 +38,13 @@ CSV_PARSER_CONF_FILE = "/opt/drtest/csv.conf"
 
 class OtherCsvParserBot(ParserBot):
     parse = ParserBot.parse_csv
+    recover_line = ParserBot.recover_line_csv_dict
 
     def __init__(self, bot_id):
         super(OtherCsvParserBot, self).__init__(bot_id=bot_id)
         self._config = utils.load_configuration(CSV_PARSER_CONF_FILE)
         self._config = self._config[self.parameters.othername]
+        self.csv_fieldnames = self._config['sequence']
 
         if self._config.get('ignore_lines_starting'):
             self.ignore_lines_starting = self._config['ignore_lines_starting']
@@ -59,7 +61,7 @@ class OtherCsvParserBot(ParserBot):
         delimiter_default = ','
         if self._config.get('delimiter'):
             delimiter_default = self._config.get('delimiter', ',')
-        for line in csv.DictReader(io.StringIO(raw_report), fieldnames=self._config['sequence'],
+        for line in csv.DictReader(io.StringIO(raw_report), fieldnames=self.csv_fieldnames,
                                    delimiter=delimiter_default):
             yield line
 
@@ -81,6 +83,9 @@ class OtherCsvParserBot(ParserBot):
                 continue
             event.add(key, value)
 
+        event.add("raw", self.recover_line(row))
+
+
         # if not event.add("source.ip", row[2], raise_failure=False):
         #     event.add("source.url", self.add_http(row[2]))
         #     event.add('source.ip', urlparse(row[2]).netloc)
@@ -88,7 +93,9 @@ class OtherCsvParserBot(ParserBot):
         yield event
 
 
+
 BOT = OtherCsvParserBot
+
 
 
 # class test(object):
