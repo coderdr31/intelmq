@@ -34,7 +34,7 @@ from intelmq.lib import utils
 
 '''
 
-CSV_PARSER_CONF_FILE = "/opt/drtest/csv.conf"
+CSV_PARSER_CONF_FILE = "/opt/drtest/newParserBots.conf"
 
 class OtherCsvParserBot(ParserBot):
     parse = ParserBot.parse_csv
@@ -45,6 +45,7 @@ class OtherCsvParserBot(ParserBot):
         self._config = utils.load_configuration(CSV_PARSER_CONF_FILE)
         self._config = self._config[self.parameters.othername]
         self.csv_fieldnames = self._config['sequence']
+        self.fixed_field = self._config['fixed_field']
 
         if self._config.get('ignore_lines_starting'):
             self.ignore_lines_starting = self._config['ignore_lines_starting']
@@ -67,6 +68,24 @@ class OtherCsvParserBot(ParserBot):
 
     def parse_line(self, row, report):  # list、raw解析出的一条,report
         event = self.new_event(report)  # report->event
+        # fixed_field 结合前端，准备在前端进行判断value是否合法
+        for key in self.fixed_field.keys():
+            class_name = event.harmonization_config[key]['type']
+            if class_name == "DateTime":
+                row[key] = row[key].strip()
+                if row[key].endswith("UTC") or row[key].endswith("+00:00"):
+                    pass
+                else:
+                    row[key] = row[key] + " UTC"
+            elif class_name == "URL":
+                if '://' not in row[key]:
+                    row[key] = 'http://' + row[key]
+        for key, value in self.fixed_field.items():
+            if value in ["-", "", "N/A"]:
+                continue
+            event.add(key, value, overwrite=True)
+            # raise_failure=False,不触发raise，不存有问题的field，但这条数据其他正确的field存入
+
         for key in row.keys():
             class_name = event.harmonization_config[key]['type']
             if class_name == "DateTime":
@@ -81,10 +100,9 @@ class OtherCsvParserBot(ParserBot):
         for key, value in row.items():
             if value in ["-", "", "N/A"]:
                 continue
-            event.add(key, value)
-
+            event.add(key, value, overwrite=True, raise_failure=False)
+            # raise_failure=False,不触发raise，不存有问题的field，但这条数据其他正确的field存入
         event.add("raw", self.recover_line(row))
-
 
         # if not event.add("source.ip", row[2], raise_failure=False):
         #     event.add("source.url", self.add_http(row[2]))
@@ -92,11 +110,7 @@ class OtherCsvParserBot(ParserBot):
 
         yield event
 
-
-
 BOT = OtherCsvParserBot
-
-
 
 # class test(object):
 #     def f1(self):
